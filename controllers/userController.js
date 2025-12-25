@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import Resume from "../models/Resume.js";
 
 const getToken = (userId) => {
   const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -86,6 +87,19 @@ export const getUserById = async (req, res) => {
     user.password = undefined;
 
     return res.status(200).json({ user });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+//get user resume
+
+export const getUserResume = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const resumes = await Resume.find({ userId });
+    return res.status(200).json({ resumes });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

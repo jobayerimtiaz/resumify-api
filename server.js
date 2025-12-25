@@ -21,6 +21,3 @@ app.use("/api/users", userRouter);
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-//resumebuilder
-//Ab9GEkuZYGHldy8z
