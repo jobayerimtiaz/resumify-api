@@ -1,4 +1,6 @@
+import imageKit from "../configs/imageKit.js";
 import Resume from "../models/Resume.js";
+import fs from "fs";
 
 export const createResume = async (req, res) => {
   try {
@@ -57,6 +59,44 @@ export const getPublicResumeById = async (req, res) => {
     }
 
     return res.status(200).json({ resume });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+//update resume
+
+export const updateResume = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { resumeId, resumeData, removeBackground } = req.body;
+    const image = req.file;
+    let resumeDataCopy = JSON.parse(resumeData);
+
+    if (image) {
+      const imageBufferData = fs.createReadStream(image.path);
+
+      const response = await imageKit.files.upload({
+        file: imageBufferData,
+        fileName: "resume.png",
+        folder: "user-resumes",
+        transformation: {
+          pre:
+            "w-300,h-300,fo-face,z-0.75" +
+            (removeBackground ? ",bg-remove" : ""),
+        },
+      });
+      resumeDataCopy.personal_info.image = response.url;
+    }
+
+    const resume = await Resume.findByIdAndUpdate(
+      { userId, _id: resumeId },
+      resumeDataCopy,
+      { new: true }
+    );
+    return res
+      .status(200)
+      .json({ message: "Resume updated successfully", resume });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
